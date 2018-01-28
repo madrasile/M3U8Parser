@@ -70,7 +70,6 @@ class M3U8Parser(object):
 
             i += 1
 
-        #self.__manifest.write("manifest.mnff")
         return self.__manifest
 
     def parseAttributes(self, statement):
@@ -93,50 +92,41 @@ class M3U8Parser(object):
     def parseVersion(self, statement):
         v = Version(statement)
         self.__manifest.setVersion(v)
-        self.__manifest.addObject(v)
 
     def parseTargetDuration(self, statement):
         t = TargetDuration(statement)
         self.__manifest.setTargetDuration(t)
-        self.__manifest.addObject(t)
 
     def parseAllowCache(self, statement):
         a = AllowCache(statement)
         self.__manifest.setAllowCache(a)
-        self.__manifest.addObject(a)
 
     def parsePlaylistType(self, statement):
         p = PlaylistType(statement)
         self.__manifest.setPlaylistType(p)
-        self.__manifest.addObject(p)
 
     def parseProgramDateTime(self, statement):
         p = ProgramDateTime(statement)
         self.__manifest.setProgramDateTime(p)
-        self.__manifest.addObject(p)
 
     def parseMediaSequence(self, statement):
         m = MediaSequence(statement)
         self.__manifest.setMediaSequence(m)
-        self.__manifest.addObject(m)
 
     def parseMedia(self, statement):
         media = self.parseAttributes(statement)
         m = Media(media)
         self.__manifest.addMedia(m)
-        self.__manifest.addObject(m)
 
     def parseStreamInf(self, statement, url):
         streamInf = self.parseAttributes(statement)
         s = StreamInf(streamInf, url)
         self.__manifest.addStreamInf(s)
-        self.__manifest.addObject(s)
 
     def parseIFrameStreamInf(self, statement):
         iFrame = self.parseAttributes(statement)
         ifs = IFrameSteamInf(iFrame)
         self.__manifest.addIFrameStreamInf(ifs)
-        self.__manifest.addObject(ifs)
 
     def parseSegment(self, statement, url):
         duration, title = statement.split(',', 1)
@@ -144,14 +134,12 @@ class M3U8Parser(object):
         if self.__currentKey != None:
             self.__currentKey.addSegment(s)
         self.__manifest.addSegment(s)
-        self.__manifest.addObject(s)
 
     def parseKey(self, statement):
         key = self.parseAttributes(statement)
         k = Key(key)
         self.__manifest.addKey(k)
-        self.__manifest.addObject(k)
         self.__currentKey = k
 
     def parseEndList(self):
-        self.__manifest.addObject(EndList())
+        self.__manifest.addChild(EndList())

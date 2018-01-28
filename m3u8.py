@@ -19,7 +19,7 @@ class Manifest(object):
         self.__ifs = []
         self.__keys = []
         self.__segments = []
-        self.__object = []
+        self.__children = []
         self.__type = None
         self.__version = None
         self.__targetDuration = None
@@ -31,72 +31,83 @@ class Manifest(object):
 
     def setVersion(self, version):
         self.__version = version
+        self.__children.append(version)
 
     def getVersion(self):
         return common.checkValue(self.__version, NoVersionException)
 
     def setTargetDuration(self, targetDuration):
         self.__targetDuration = targetDuration
+        self.__children.append(targetDuration)
 
     def getTargetDuration(self):
         return common.checkValue(self.__targetDuration, NoTargetDurationException)
 
     def setAllowCache(self, allowCache):
         self.__allowCache = allowCache
+        self.__children.append(allowCache)
 
     def getAllowCache(self):
         return common.checkValue(self.__allowCache, NoAllowCacheException)
 
     def setPlaylistType(self, playlistType):
         self.__playlistType = playlistType
+        self.__children.append(playlistType)
 
     def getPlaylistType(self):
         return common.checkValue(self.__playlistType, NoPlaylistTypeException)
 
     def setProgramDateTime(self, programDateTime):
         self.__programDateTime = programDateTime
+        self.__children.append(programDateTime)
 
     def getProgramDateTime(self):
         return common.checkValue(self.__programDateTime, NoProgramDateTimeException)
 
     def setMediaSequence(self, mediaSequence):
         self.__mediaSequence = mediaSequence
+        self.__children.append(mediaSequence)
 
     def getMediaSequence(self):
         return self.__mediaSequence
 
-    def addObject(self, obj):
-        self.__object.append(obj)
+    def addChild(self, obj):
+        self.__children.append(obj)
 
-    def getObjects(self, ind):
-        return self.__object[ind]
+    def getChildren(self, ind):
+        return self.__children[ind]
 
     def addMedia(self, media):
         self.__medias.append(media)
+        self.__children.append(media)
 
     def getMedias(self):
         return self.__medias
 
     def addStreamInf(self, stream):
         self.__streamInfs.append(stream)
+        self.__children.append(stream)
 
     def getStreamInfs(self):
         return self.__streamInfs
 
     def addIFrameStreamInf(self, ifs):
         self.__ifs.append(ifs)
+        self.__children.append(ifs)
 
     def getIFrameStreamInfs(self):
         return self.__ifs
 
     def addKey(self, key):
         self.__keys.append(key)
+        self.__children.append(key)
 
     def getKeys(self):
         return self.__keys
 
     def addSegment(self, segment):
         self.__segments.append(segment)
+        self.__children.append(segment)
 
     def getSegments(self):
         return self.__segments
@@ -153,7 +164,7 @@ class Manifest(object):
 
     def __str__(self):
         s = "#EXTM3U"
-        for object in self.__object:
+        for object in self.__children:
             #print(str(object))
             s += "\n%s" % str(object)
         return s

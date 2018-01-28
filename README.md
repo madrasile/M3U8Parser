@@ -15,12 +15,13 @@ you are the one responsible if you create/modify a manifest that doesn't
 fit your player.
 
 
-Table of Content
-================
+Table of Contents
+=================
 * [Tags](#Tags)
     * [Supported](#supported)
     * [Not supported](#not-supported)
 * [Documentation](#documentation)
+    * [Build a manifest](#build-a-manifest)
     * [Usage](#usage)
 
 Tags
@@ -60,9 +61,8 @@ Not supported
 Documentation
 =============
 
-Usage
------
-
+Build a manifest
+----------------
 
 First you have to create a Parser object following one of these methods :
 - From link :
@@ -83,6 +83,20 @@ Then you can parse the manifest to have the  :
 manifest = parser.parse()
 ```
 
+Usage
+-----
+
+After creating your manifest, you can access all its attributes through
+those methods :
+- getVersion/setVersion : return or set a Version object
+- getTargetduration/setTargetDuration : return or set a TargetDuration
+object
+- getAllowCache/setAllowCache : return or set a TargetDuration object
+- getPlaylistType/setPlaylistType : return or set a PlaylistType object
+- getProgramDateTime/setProgramDateTime : return or set a ProgramDateTime
+object
+- getMediaSequence/setMediaSequence : return or set a MediaSequence
+object
 
 > Note : This is still under development and some features like multikey
 > is not supported yet
