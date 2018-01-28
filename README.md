@@ -50,7 +50,7 @@ Documentation
 Usage
 -----
 
-There are three way to create manifest object :
+First you have to create a Parser object following one of these methods :
 - From link :
 ```python
 parser = M3U8Parser(link = theLink)
@@ -64,7 +64,10 @@ parser = M3U8Parser(file = theFile)
 parser = M3U8Parser(string = theString)
 ```
 
-Then you can Parse the manifest : `manifest = parser.parse()`
+Then you can Parse the manifest :
+```python
+manifest = parser.parse()
+```
 
 
 > Note : This is still under development and some features like multikey
