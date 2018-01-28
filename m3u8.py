@@ -14,8 +14,8 @@ def PlayListMaster(f):
 class Manifest(object):
 
     def __init__(self):
-        self.__media = []
-        self.__streamInf = []
+        self.__medias = []
+        self.__streamInfs = []
         self.__ifs = []
         self.__keys = []
         self.__segments = []
@@ -72,16 +72,16 @@ class Manifest(object):
         return self.__object[ind]
 
     def addMedia(self, media):
-        self.__media.append(media)
+        self.__medias.append(media)
 
     def getMedias(self):
-        return self.__media
+        return self.__medias
 
     def addStreamInf(self, stream):
-        self.__streamInf.append(stream)
+        self.__streamInfs.append(stream)
 
     def getStreamInfs(self):
-        return self.__streamInf
+        return self.__streamInfs
 
     def addIFrameStreamInf(self, ifs):
         self.__ifs.append(ifs)
@@ -103,7 +103,7 @@ class Manifest(object):
 
     def getBestStreamQuality(self):
         resolution = ()
-        for stream in self.__streamInf:
+        for stream in self.__streamInfs:
             try:
                 if stream.getResolutionTuple() > resolution:
                     self.__bestStreamQuality = stream
@@ -114,7 +114,7 @@ class Manifest(object):
     def forceBestStreamQuality(self):
         if self.__bestStreamQuality == None:
             self.getBestStreamQuality()
-        for stream in self.__streamInf:
+        for stream in self.__streamInfs:
             try:
                 stream.getResolutionTuple()
                 stream.setUrl(self.__bestStreamQuality.getUrl())
@@ -123,13 +123,13 @@ class Manifest(object):
 
     def inspectMedias(self):
         i = 0
-        for media in self.__media:
+        for media in self.__medias:
             media.inspect(i)
             i += 1
 
     def inspectStreamInfs(self):
         i = 0
-        for streams in self.__streamInf:
+        for streams in self.__streamInfs:
             streams.inspect(i)
             i += 1
 

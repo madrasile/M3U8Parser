@@ -10,6 +10,19 @@ This is the final RFC not a draft and some Tags were removed from
 previous versions of the protocol HLS but for retro compatibilities
 I decided to maintain them.
 
+The parser is not checking if you are respecting the HLS Protocol, therefor
+you are the one responsible if you create/modify a manifest that doesn't
+fit your player.
+
+
+Table of Content
+================
+* [Tags](#Tags)
+    * [Supported](#supported)
+    * [Not supported](#not-supported)
+* [Documentation](#documentation)
+    * [Usage](#usage)
+
 Tags
 ====
 
@@ -50,6 +63,7 @@ Documentation
 Usage
 -----
 
+
 First you have to create a Parser object following one of these methods :
 - From link :
 ```python
@@ -64,7 +78,7 @@ parser = M3U8Parser(file = theFile)
 parser = M3U8Parser(string = theString)
 ```
 
-Then you can Parse the manifest :
+Then you can parse the manifest to have the  :
 ```python
 manifest = parser.parse()
 ```
