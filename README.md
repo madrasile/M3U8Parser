@@ -5,10 +5,12 @@ This is a simple HLS Manifest Parser written in Python 3.6, no
 dependency is required.<br>
 It is made for a personal use and provide some extra function as I need.
 
-This parser was maid using [RFC 8216](https://tools.ietf.org/html/rfc8216)<br>
+This parser was made using [RFC 8216](https://tools.ietf.org/html/rfc8216)<br>
 This is the final RFC not a draft and some Tags were removed from
 previous versions of the protocol HLS but for retro compatibilities
-I decided to maintain then.
+I decided to maintain them.
+
+[TOC]
 
 Tags
 ====
