@@ -3,15 +3,23 @@ import codecs
 import re
 import common
 import time
+import requests
 
 from m3u8 import Manifest, Segment, Media, StreamInf, IFrameSteamInf, Key, Version, AllowCache, TargetDuration\
-    ,PlaylistType, MediaSequence, EndList
+    ,PlaylistType, MediaSequence, EndList, ProgramDateTime
 from rfc8216 import PlaylistTag, PlaylistMode
 
 class M3U8Parser(object):
 
-    def __init__(self, rManifest):
-        self.__rManifest = rManifest
+    def __init__(self, string = None, file = None, url = None):
+
+        if string != None:
+            self.__rManifest = string
+        elif file != None:
+            self.__rManifest = codecs.open(file, 'r', 'utf-8').read()
+        else:
+            self.__rManifest = requests.get(url).text
+
         self.__currentKey = None
 
     def parseManifest(self):
@@ -41,8 +49,8 @@ class M3U8Parser(object):
             elif command == PlaylistTag.EXT_X_MEDIA_SEQUENCE.value:
                 self.parseMediaSequence(statement)
 
-            elif command == PlaylistTag.EXT_X_PROGRAM_DATE_TIME:
-                pass
+            elif command == PlaylistTag.EXT_X_PROGRAM_DATE_TIME.value:
+                self.parseProgramDateTime(statement)
 
             elif command == PlaylistTag.EXT_X_KEY.value:
                 self.parseKey(statement)
@@ -107,6 +115,11 @@ class M3U8Parser(object):
         self.__manifest.setPlaylistType(p)
         self.__manifest.addObject(p)
 
+    def parseProgramDateTime(self, statement):
+        p = ProgramDateTime(statement)
+        self.__manifest.setProgramDateTime(p)
+        self.__manifest.addObject(p)
+
     def parseMediaSequence(self, statement):
         m = MediaSequence(statement)
         self.__manifest.setMediaSequence(m)
@@ -147,13 +160,3 @@ class M3U8Parser(object):
 
     def parseEndList(self):
         self.__manifest.addObject(EndList())
-
-start_time = time.time()
-a = M3U8Parser(codecs.open(sys.argv[1], 'r', 'utf-8').read())
-m = a.parseManifest()
-end_read = time.time() - start_time
-m.write("test.mnff")
-end_write = time.time() - start_time
-
-print("Read = %s" % end_read)
-print("Write = %s" % end_write)
