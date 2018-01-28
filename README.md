@@ -10,8 +10,6 @@ This is the final RFC not a draft and some Tags were removed from
 previous versions of the protocol HLS but for retro compatibilities
 I decided to maintain them.
 
-[TOC]
-
 Tags
 ====
 
