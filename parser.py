@@ -1,12 +1,7 @@
-import sys
-import codecs
 import re
-import common
-import time
 import requests
 
-from m3u8 import Manifest, Segment, Media, StreamInf, IFrameSteamInf, Key, Version, AllowCache, TargetDuration\
-    ,PlaylistType, MediaSequence, EndList, ProgramDateTime
+from m3u8 import *
 from rfc8216 import PlaylistTag, PlaylistMode
 
 class M3U8Parser(object):

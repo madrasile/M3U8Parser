@@ -1,11 +1,11 @@
 from rfc8216 import MediaAttributes, StreamInfAttributes, IFrameStreamInfAttributes, PlaylistMode, KeyAttributes
-from exception import NotMasterPlaylistException, NoQualityResolutionException, SegmentNotEncrypted
+from exception import *
 import codecs
 import common
 
 def PlayListMaster(f):
     def wrapper(*args):
-        if args[0].getType() == PlaylistType.MASTER:
+        if args[0].getType() == PlaylistMode.MASTER:
             return f(*args)
         else:
             raise NotMasterPlaylistException
@@ -25,6 +25,7 @@ class Manifest(object):
         self.__targetDuration = None
         self.__allowCache = None
         self.__playlistType = None
+        self.__programDateTime = None
         self.__mediaSequence = None
         self.__bestStreamQuality = None
 
@@ -32,28 +33,31 @@ class Manifest(object):
         self.__version = version
 
     def getVersion(self):
-        return self.__version.getVersion()
+        return common.checkValue(self.__version, NoVersionException)
 
     def setTargetDuration(self, targetDuration):
         self.__targetDuration = targetDuration
 
     def getTargetDuration(self):
-        return self.__targetDuration.getTargetDuration()
+        return common.checkValue(self.__targetDuration, NoTargetDurationException)
 
     def setAllowCache(self, allowCache):
         self.__allowCache = allowCache
 
     def getAllowCache(self):
-        return self.__allowCache.getAllowCache()
-
-    def getAllowCacheBoolean(self):
-        return self.__allowCache.getAllowCacheBoolean()
+        return common.checkValue(self.__allowCache, NoAllowCacheException)
 
     def setPlaylistType(self, playlistType):
         self.__playlistType = playlistType
 
     def getPlaylistType(self):
-        return self.__playlistType.getPlaylistType()
+        return common.checkValue(self.__playlistType, NoPlaylistTypeException)
+
+    def setProgramDateTime(self, programDateTime):
+        self.__programDateTime = programDateTime
+
+    def getProgramDateTime(self):
+        return common.checkValue(self.__programDateTime, NoProgramDateTimeException)
 
     def setMediaSequence(self, mediaSequence):
         self.__mediaSequence = mediaSequence
@@ -129,10 +133,16 @@ class Manifest(object):
             streams.inspect(i)
             i += 1
 
-    def inspectStream(self):
+    def inspectIFrameStream(self):
         i = 0
         for ifs in self.__ifs:
             ifs.inspect(i)
+            i += 1
+
+    def inspectSegments(self):
+        i = 0
+        for seg in self.__segments:
+            seg.inspect(i)
             i += 1
 
     def setType(self, type):
@@ -140,15 +150,6 @@ class Manifest(object):
 
     def getType(self):
         return self.__type
-
-    # def toString(self):
-    #     id = 0
-    #     s = "Manifest type is %s\n" % self.__type.value
-    #     s += "Media are :\n"
-    #     for media in self.__media:
-    #         s += "\tInternal ID = %s" % id
-    #         s += "\t%s\n"
-    #         id+=1
 
     def __str__(self):
         s = "#EXTM3U"
@@ -436,6 +437,16 @@ class Segment(object):
         s = "#EXTINF:%s,%s\n%s" % (self.__duration, self.__title, self.__url)
         return s
 
+    def inspect(self, *args):
+        if len(args) == 1:
+            print("\nEXTINF %s - Attributes" % args[0])
+        else:
+            print("\nEXTINF - Attributes")
+        print("\tDuration = %s" % self.__duration)
+        print("\tTitle = %s" % self.__duration)
+        print("\tURL = %s" % self.__url)
+        print("\tKey\n%s" % self.__key)
+
     def getDuration(self):
         return self.__duration
 
@@ -517,90 +528,109 @@ class Key(Tag):
 "EXT-X-VERSION Class"
 class Version(object):
 
-    def __init__(self, version):
-        self.__version = version
+    def __init__(self, value):
+        self.__value = value
 
     def __str__(self):
-        s = "#EXT-X-VERSION:%s" % self.__version
+        s = "#EXT-X-VERSION:%s" % self.__value
         return s
 
-    def setVersion(self, version):
-        self.__version = version
+    def setValue(self, value):
+        self.__value = value
 
-    def getVersion(self):
-        return self.__version
+    def getValue(self):
+        return self.__value
 
 "EXT-X-TARGETDURATION Class"
 class TargetDuration(object):
 
-    def __init__(self, targetDuration):
-        self.__targetDuration = targetDuration
+    def __init__(self, value):
+        self.__value = value
 
     def __str__(self):
-        s = "#EXT-X-TARGETDURATION:%s" % self.__targetDuration
+        s = "#EXT-X-TARGETDURATION:%s" % self.__value
         return s
 
-    def setTargetDuaration(self, targetDuration):
-        self.__targetDuration = targetDuration
+    def setValue(self, value):
+        self.__value = value
 
-    def getTargetDuration(self):
-        return self.__targetDuration
+    def getValue(self):
+        return self.__value
 
 "EXT-X-ALLOW-CACHE Class"
 class AllowCache(object):
 
-    def __init__(self, allowCache):
-        self.__allowCache = allowCache
+    def __init__(self, value):
+        self.__value = value
 
     def __str__(self):
-        s = "#EXT-X-ALLOW-CACHE:%s" % self.__allowCache
+        s = "#EXT-X-ALLOW-CACHE:%s" % self.__value
         return s
 
-    def setAllowCache(self, boolean):
+    def setValueBoolean(self, boolean):
         if boolean == True:
-            self.__allowCache = "YES"
+            self.__value = "YES"
         else:
-            self.__allowCache = "NO"
+            self.__value = "NO"
 
-    def getAllowCache(self):
-        return self.__allowCache
-
-    def getAllowCacheBoolean(self):
-        if self.__allowCache == "YES":
+    def getValueBoolean(self):
+        if self.__value == "YES":
             return True
-        elif self.__allowCache == "NO":
+        elif self.__value == "NO":
             return False
         else:
             return None
 
+    def setValue(self, value):
+        self.__value = value
+
+    def getValue(self):
+        return self.__value
+
 "EXT-X-PLAYLIST-TYPE Class"
 class PlaylistType(object):
 
-    def __init__(self, type):
-        self.__type = type
+    def __init__(self, value):
+        self.__value = value
 
     def __str__(self):
-        s = "#EXT-X-PLAYLIST-TYPE:%s" % self.__type
+        s = "#EXT-X-PLAYLIST-TYPE:%s" % self.__value
         return s
 
-    def setType(self, type):
-        self.__type = type
+    def setValue(self, value):
+        self.__value = value
 
-    def getType(self):
-        return self.__type
+    def getValue(self):
+        return self.__value
 
 "EXT-X-MEDIA-SEQUENCE Class"
 class MediaSequence(object):
 
-    def __init__(self, mediaSequence):
-        self.__mediaSequence = mediaSequence
+    def __init__(self, value):
+        self.__value = value
 
     def __str__(self):
-        s = "#EXT-X-MEDIA-SEQUENCE:%s" % self.__mediaSequence
+        s = "#EXT-X-MEDIA-SEQUENCE:%s" % self.__value
         return s
 
-    def setMediaSequence(self, mediaSequence):
-        self.__mediaSequence = mediaSequence
+    def setValue(self, value):
+        self.__value = value
 
-    def getMediaSequence(self):
-        return self.__mediaSequence
+    def getValue(self):
+        return self.__value
+
+"EXT-X-PROGRAM-DATE-TIME Class"
+class ProgramDateTime(object):
+
+    def __init__(self, value):
+        self.__value = value
+
+    def __str__(self):
+        s = "#EXT-X-PROGRAM-DATE-TIME:%s" % self.__value
+        return s
+
+    def setValue(self, value):
+        self.__value = value
+
+    def getValue(self):
+        return self.__value
