@@ -51,9 +51,18 @@ Usage
 -----
 
 There are three way to create manifest object :
-- From link : `parser = M3U8Parser(link = theLink)`
-- From file : `parser = M3U8Parser(file = theFile)`
-- From string : `parser = M3U8Parser(string = theString)`
+- From link :
+```python
+parser = M3U8Parser(link = theLink)
+```
+- From file :
+```python
+parser = M3U8Parser(file = theFile)
+```
+- From string :
+```python
+parser = M3U8Parser(string = theString)
+```
 
 Then you can Parse the manifest : `manifest = parser.parse()`
 
