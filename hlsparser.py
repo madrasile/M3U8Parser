@@ -148,4 +148,5 @@ class M3U8Parser(object):
         self.__currentKey = k
 
     def parseEndList(self):
-        self.__manifest.addChild(EndList())
+        e = EndList(self.__index)
+        self.__manifest.addChild(e, e.getIndex())
