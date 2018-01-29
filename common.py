@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 """Those are all functions needed for the Parser"""
 

@@ -1,15 +1,10 @@
-from rfc8216 import MediaAttributes, StreamInfAttributes, IFrameStreamInfAttributes, PlaylistMode, KeyAttributes
+# -*- coding: utf-8 -*-
+
+from rfc8216 import MediaAttributes, StreamInfAttributes, IFrameStreamInfAttributes, KeyAttributes
 from exception import *
+from collections import OrderedDict
 import codecs
 import common
-
-def PlayListMaster(f):
-    def wrapper(*args):
-        if args[0].getType() == PlaylistMode.MASTER:
-            return f(*args)
-        else:
-            raise NotMasterPlaylistException
-    return wrapper
 
 class Manifest(object):
 
@@ -19,7 +14,7 @@ class Manifest(object):
         self.__ifs = []
         self.__keys = []
         self.__segments = []
-        self.__children = []
+        self.__children = {}
         self.__type = None
         self.__version = None
         self.__targetDuration = None
@@ -31,83 +26,83 @@ class Manifest(object):
 
     def setVersion(self, version):
         self.__version = version
-        self.__children.append(version)
+        self.addChild(version)
 
     def getVersion(self):
         return common.checkValue(self.__version, NoVersionException)
 
     def setTargetDuration(self, targetDuration):
         self.__targetDuration = targetDuration
-        self.__children.append(targetDuration)
+        self.addChild(targetDuration)
 
     def getTargetDuration(self):
         return common.checkValue(self.__targetDuration, NoTargetDurationException)
 
     def setAllowCache(self, allowCache):
         self.__allowCache = allowCache
-        self.__children.append(allowCache)
+        self.addChild(allowCache)
 
     def getAllowCache(self):
         return common.checkValue(self.__allowCache, NoAllowCacheException)
 
     def setPlaylistType(self, playlistType):
         self.__playlistType = playlistType
-        self.__children.append(playlistType)
+        self.addChild(playlistType)
 
     def getPlaylistType(self):
         return common.checkValue(self.__playlistType, NoPlaylistTypeException)
 
     def setProgramDateTime(self, programDateTime):
         self.__programDateTime = programDateTime
-        self.__children.append(programDateTime)
+        self.addChild(programDateTime)
 
     def getProgramDateTime(self):
         return common.checkValue(self.__programDateTime, NoProgramDateTimeException)
 
     def setMediaSequence(self, mediaSequence):
         self.__mediaSequence = mediaSequence
-        self.__children.append(mediaSequence)
+        self.addChild(mediaSequence)
 
     def getMediaSequence(self):
         return self.__mediaSequence
 
     def addChild(self, obj):
-        self.__children.append(obj)
+        self.__children.add(obj)
 
     def getChildren(self, ind):
         return self.__children[ind]
 
     def addMedia(self, media):
         self.__medias.append(media)
-        self.__children.append(media)
+        self.addChild(media)
 
     def getMedias(self):
         return self.__medias
 
     def addStreamInf(self, stream):
         self.__streamInfs.append(stream)
-        self.__children.append(stream)
+        self.addChild(stream)
 
     def getStreamInfs(self):
         return self.__streamInfs
 
     def addIFrameStreamInf(self, ifs):
         self.__ifs.append(ifs)
-        self.__children.append(ifs)
+        self.addChild(ifs)
 
     def getIFrameStreamInfs(self):
         return self.__ifs
 
     def addKey(self, key):
         self.__keys.append(key)
-        self.__children.append(key)
+        self.addChild(key)
 
     def getKeys(self):
         return self.__keys
 
     def addSegment(self, segment):
         self.__segments.append(segment)
-        self.__children.append(segment)
+        self.addChild(segment)
 
     def getSegments(self):
         return self.__segments
@@ -162,6 +157,9 @@ class Manifest(object):
     def getType(self):
         return self.__type
 
+    def flush(self):
+        del self.__children[:]
+
     def __str__(self):
         s = "#EXTM3U"
         for object in self.__children:
@@ -174,20 +172,28 @@ class Manifest(object):
         file.write(self.__str__())
         file.close()
 
+"TAG Class"
 class Tag(object):
 
-    def __init__(self, attributes, tagAttributes):
+    def __init__(self, attributes, tagAttributes, index):
         self.attributes = attributes
         for param in [x.value for x in tagAttributes]:
             if param not in attributes.keys():
                 self.attributes[param] = None
+        self.__index = index
+
+    def setIndex(self, index):
+        self.__index = index
+
+    def getIndex(self):
+        return self.__index
 
 "EXT-X-MEDIA Class"
 class Media(Tag):
 
     # KeyError Exception
-    def __init__(self, mediaDict, **kwargs):
-        super().__init__(mediaDict, MediaAttributes)
+    def __init__(self, mediaDict, index, **kwargs):
+        super().__init__(mediaDict, MediaAttributes, index)
 
     def __str__(self):
         s = "#EXT-X-MEDIA:"
@@ -288,8 +294,8 @@ class Media(Tag):
 "EXT-X-STREAM-INF Class"
 class StreamInf(Tag):
 
-    def __init__(self, streamInfDict, url):
-        super().__init__(streamInfDict, StreamInfAttributes)
+    def __init__(self, streamInfDict, url, index):
+        super().__init__(streamInfDict, StreamInfAttributes, index)
         self.url = url
 
     def __str__(self):
@@ -379,8 +385,8 @@ class StreamInf(Tag):
 
 "EXT-X-I-FRAME-STREAM-INF Class"
 class IFrameSteamInf(Tag):
-    def __init__(self, iframeStreamDict):
-        super().__init__(iframeStreamDict, IFrameStreamInfAttributes)
+    def __init__(self, iFrameStreamDict, index):
+        super().__init__(iFrameStreamDict, IFrameStreamInfAttributes, index)
 
     def __str__(self):
         s = "#EXT-X-I-FRAME-STREAM-INF:"
@@ -438,11 +444,12 @@ class IFrameSteamInf(Tag):
 "EXTINF Class"
 class Segment(object):
 
-    def __init__(self, duration, title, url, key):
+    def __init__(self, duration, title, url, key, index):
         self.__duration = duration
         self.__title = title
         self.__url = url
         self.__key = key
+        self.__index = index
 
     def __str__(self):
         s = "#EXTINF:%s,%s\n%s" % (self.__duration, self.__title, self.__url)
@@ -501,8 +508,8 @@ class EndList(object):
 "EXT_X_KEY Class"
 class Key(Tag):
 
-    def __init__(self, keyDict):
-        super().__init__(keyDict, KeyAttributes)
+    def __init__(self, keyDict, index):
+        super().__init__(keyDict, KeyAttributes, index)
         self.__segments = []
 
     def __str__(self):
@@ -539,8 +546,9 @@ class Key(Tag):
 "EXT-X-VERSION Class"
 class Version(object):
 
-    def __init__(self, value):
+    def __init__(self, value, index):
         self.__value = value
+        self.__index = index
 
     def __str__(self):
         s = "#EXT-X-VERSION:%s" % self.__value
@@ -552,11 +560,18 @@ class Version(object):
     def getValue(self):
         return self.__value
 
+    def setIndex(self, index):
+        self.__index = index
+
+    def getIndex(self):
+        return self.__index
+
 "EXT-X-TARGETDURATION Class"
 class TargetDuration(object):
 
-    def __init__(self, value):
+    def __init__(self, value, index):
         self.__value = value
+        self.__index = index
 
     def __str__(self):
         s = "#EXT-X-TARGETDURATION:%s" % self.__value
@@ -568,11 +583,18 @@ class TargetDuration(object):
     def getValue(self):
         return self.__value
 
+    def setIndex(self, index):
+        self.__index = index
+
+    def getIndex(self):
+        return self.__index
+
 "EXT-X-ALLOW-CACHE Class"
 class AllowCache(object):
 
-    def __init__(self, value):
+    def __init__(self, value, index):
         self.__value = value
+        self.__index = index
 
     def __str__(self):
         s = "#EXT-X-ALLOW-CACHE:%s" % self.__value
@@ -598,11 +620,18 @@ class AllowCache(object):
     def getValue(self):
         return self.__value
 
+    def setIndex(self, index):
+        self.__index = index
+
+    def getIndex(self):
+        return self.__index
+
 "EXT-X-PLAYLIST-TYPE Class"
 class PlaylistType(object):
 
-    def __init__(self, value):
+    def __init__(self, value, index):
         self.__value = value
+        self.__index = index
 
     def __str__(self):
         s = "#EXT-X-PLAYLIST-TYPE:%s" % self.__value
@@ -614,11 +643,18 @@ class PlaylistType(object):
     def getValue(self):
         return self.__value
 
+    def setIndex(self, index):
+        self.__index = index
+
+    def getIndex(self):
+        return self.__index
+
 "EXT-X-MEDIA-SEQUENCE Class"
 class MediaSequence(object):
 
-    def __init__(self, value):
+    def __init__(self, value, index):
         self.__value = value
+        self.__index = index
 
     def __str__(self):
         s = "#EXT-X-MEDIA-SEQUENCE:%s" % self.__value
@@ -630,11 +666,18 @@ class MediaSequence(object):
     def getValue(self):
         return self.__value
 
+    def setIndex(self, index):
+        self.__index = index
+
+    def getIndex(self):
+        return self.__index
+
 "EXT-X-PROGRAM-DATE-TIME Class"
 class ProgramDateTime(object):
 
-    def __init__(self, value):
+    def __init__(self, value, index):
         self.__value = value
+        self.__index = index
 
     def __str__(self):
         s = "#EXT-X-PROGRAM-DATE-TIME:%s" % self.__value
@@ -645,3 +688,9 @@ class ProgramDateTime(object):
 
     def getValue(self):
         return self.__value
+
+    def setIndex(self, index):
+        self.__index = index
+
+    def getIndex(self):
+        return self.__index

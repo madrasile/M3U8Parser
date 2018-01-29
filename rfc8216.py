@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from enum import Enum
 
 """This class enumerate all the tags present in the RFC 8216 (describe the version 6 of the HLS protocol)
