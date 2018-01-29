@@ -9,11 +9,6 @@ from m3u8 import Manifest, Version, ProgramDateTime, EndList, MediaSequence, Tar
     Segment, Media, StreamInf, IFrameSteamInf, PlaylistType
 from rfc8216 import PlaylistTag
 
-class mdr(object):
-
-    def __init__(self):
-        pass
-
 class M3U8Parser(object):
 
     def __init__(self, string = None, file = None, url = None):
